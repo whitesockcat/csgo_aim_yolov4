@@ -22,6 +22,8 @@ from yolov3.configs import *
 from yolov3.yolov4 import read_class_names
 from tools.Detection_to_XML import CreateXMLfile
 import random
+from pymouse import *     # 模拟鼠标所使用的包
+from pykeyboard import *   # 模拟键盘所使用的包
 
 # pyautogui settings
 import pyautogui # https://totalcsgo.com/commands/mouse
@@ -130,9 +132,14 @@ def getwindowgeometry():
                 time.sleep(5)
                 continue
 
+mouse = PyMouse()
+keyboard = PyKeyboard()   # 键盘的实例k
 def move_mouse(x1,y1,x2,y2,use_relate_xy):
-    
+    if not use_relate_xy:
+        mouse.move(x2,y2)
+    '''
     duration = 0# 0.05 + int(random.random()*100)/800
+    
     try:
         if use_relate_xy:
             pyautogui.move(x2,y2,duration,tween=pyautogui.easeOutQuad)
@@ -143,6 +150,8 @@ def move_mouse(x1,y1,x2,y2,use_relate_xy):
             pyautogui.move(x2,y2,duration)
         else:
             pyautogui.moveTo(x1,y1,duration)
+    '''
+
 
 offset = 30
 times = []
@@ -157,6 +166,7 @@ h=int(900/2)
 pyautogui.FAILSAFE=False
 mouseDown_time = 0
 show_debug_window = True
+
 while True:
     try:
         t1 = time.time()
@@ -187,11 +197,12 @@ while True:
             if time.time() - mouseDown_time >1:
                 pyautogui.mouseUp(button='left')
                 mouseDown_time = 0
-                pyautogui.keyUp('ctrl')
+                #pyautogui.keyUp('ctrl')
+                #keyboard.release_key(keyboard.control_key)
             #else:
             #    pyautogui.click()        
 
-        use_relate_xy = False
+        use_relate_xy = True
         #优先打头
         if len(th_list)>0:
             new = min(th_list[::2], key=abs)
@@ -207,8 +218,9 @@ while True:
             #pyautogui.click()
             if abs(th_list[index])<50 and abs(th_list[index+1])<50:
                 pyautogui.mouseDown(button='left')
-                pyautogui.keyDown('ctrl')
-                if mouseDown_time == 0:
+                #pyautogui.keyDown('ctrl')
+                #keyboard.press_key(keyboard.control_key)
+                if  mouseDown_time == 0:
                     print("head mouseDown")
                     mouseDown_time = time.time()
                     
@@ -227,7 +239,8 @@ while True:
             #pyautogui.click()
             if abs(t_list[index])<50 and abs(t_list[index+1])<50:
                 pyautogui.mouseDown(button='left')
-                pyautogui.keyDown('ctrl')
+                #pyautogui.keyDown('ctrl')
+                #keyboard.press_key(keyboard.control_key)
                 if mouseDown_time == 0:
                     print("body mouseDown")
                     mouseDown_time = time.time()
