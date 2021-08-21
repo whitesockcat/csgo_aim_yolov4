@@ -81,7 +81,7 @@ def draw_enemy(image, bboxes, CLASSES=YOLO_COCO_CLASSES, show_label=True, show_c
 
     return image, detection_list
 
-def detect_enemy(Yolo, original_image, input_size=416, CLASSES=YOLO_COCO_CLASSES, score_threshold=0.2, iou_threshold=0.3, rectangle_colors=''):
+def detect_enemy(Yolo, original_image, input_size=416, CLASSES=YOLO_COCO_CLASSES, score_threshold=0.2, iou_threshold=0.35, rectangle_colors=''):
     image_data = image_preprocess(original_image, [input_size, input_size])
     image_data = image_data[np.newaxis, ...].astype(np.float32)
 
@@ -168,24 +168,31 @@ while True:
         cv2.circle(image,(int(w/2),int(h/2)), 3, (255,255,255), -1) # center of weapon sight
         #print("detection_list:",len(detection_list))
         th_list, t_list = [], []
+        ch_list, c_list = [], []
         for detection in detection_list:
             diff_x = (int(w/2) - int(detection[1]))*-1
             diff_y = (int(h/2) - int(detection[2]))*-1
             if detection[0] == "th":
                 th_list += [diff_x, diff_y]
-            else:
+            elif detection[0] == "t":
                 t_list += [diff_x, diff_y]
+            elif detection[0] == "ch":
+                ch_list += [diff_x, diff_y]
+            elif detection[0] == "c":
+                c_list += [diff_x, diff_y]
+
         move=()
         movehead =()
         if mouseDown_time > 0 :
-            if time.time() - mouseDown_time >0.5:
+            if time.time() - mouseDown_time >1:
                 pyautogui.mouseUp(button='left')
                 mouseDown_time = 0
-            else:
-                pyautogui.click()        
+                pyautogui.keyUp('ctrl')
+            #else:
+            #    pyautogui.click()        
 
-        use_relate_xy = True
-
+        use_relate_xy = False
+        #优先打头
         if len(th_list)>0:
             new = min(th_list[::2], key=abs)
             index = th_list.index(new)
@@ -197,37 +204,44 @@ while True:
             movehead = (th_list[index],th_list[index+1])
 
             move_mouse(x1,y1,th_list[index],th_list[index+1],use_relate_xy)
-            pyautogui.click()
-            if abs(th_list[index])<20:
-
+            #pyautogui.click()
+            if abs(th_list[index])<50 and abs(th_list[index+1])<50:
+                pyautogui.mouseDown(button='left')
+                pyautogui.keyDown('ctrl')
                 if mouseDown_time == 0:
-                    pyautogui.mouseDown(button='left')
                     print("head mouseDown")
                     mouseDown_time = time.time()
+                    
+            #else:
+            #    pyautogui.mouseUp(button='left')
 
-        elif len(t_list)>0:
+        if len(t_list)>0:
             new = min(t_list[::2], key=abs)
             index = t_list.index(new)
             x2 = w/2 + x + t_list[index]
             y2 = h/2 + y + t_list[index+1]
             #xx = t_list[index]
             move = (x2,y2)
-            movehead = (t_list[index],t_list[index+1])
+            move = (t_list[index],t_list[index+1])
             move_mouse(x2,y2,t_list[index],t_list[index+1],use_relate_xy)
-            pyautogui.click()
-            if abs(t_list[index])<20:
-              
+            #pyautogui.click()
+            if abs(t_list[index])<50 and abs(t_list[index+1])<50:
+                pyautogui.mouseDown(button='left')
+                pyautogui.keyDown('ctrl')
                 if mouseDown_time == 0:
-                    pyautogui.mouseDown(button='left')
                     print("body mouseDown")
                     mouseDown_time = time.time()
+                    
+            #else:
+            #    pyautogui.mouseUp(button='left')
 
         t2 = time.time()
         times.append(t2-t1)
         times = times[-50:]
         ms = sum(times)/len(times)*1000
         fps = 1000 / ms
-        print("h",movehead,"b",move,"FPS %1.2f"% fps,"detect:",len(detection_list),"th",len(th_list),"t",len(t_list))
+        print("h",movehead,"\tb",move,"\tFPS %1.2f"% fps,"\tdetect:",len(detection_list),
+        "\tth",len(th_list),"\tt",len(t_list),"\tch",len(ch_list),"\tct",len(c_list))
 
         if show_debug_window:
             image = cv2.putText(image, "Time: {:.1f}FPS".format(fps), (0, 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 2)
