@@ -9,7 +9,7 @@
 #
 #================================================================
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+#os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import subprocess
 import time
 from datetime import datetime
@@ -29,8 +29,10 @@ pyautogui.MINIMUM_DURATION = 0.15
 pyautogui.MINIMUM_SLEEP = 0.5
 pyautogui.PAUSE = 0
 
+NUM_CLASS = read_class_names(TRAIN_CLASSES)
+
 def draw_enemy(image, bboxes, CLASSES=YOLO_COCO_CLASSES, show_label=True, show_confidence = True, Text_colors=(255,255,0), rectangle_colors='', tracking=False):   
-    NUM_CLASS = read_class_names(CLASSES)
+    
     num_classes = len(NUM_CLASS)
     image_h, image_w, _ = image.shape
     hsv_tuples = [(1.0 * x / num_classes, 1., 1.) for x in range(num_classes)]
@@ -79,7 +81,7 @@ def draw_enemy(image, bboxes, CLASSES=YOLO_COCO_CLASSES, show_label=True, show_c
 
     return image, detection_list
 
-def detect_enemy(Yolo, original_image, input_size=416, CLASSES=YOLO_COCO_CLASSES, score_threshold=0.3, iou_threshold=0.45, rectangle_colors=''):
+def detect_enemy(Yolo, original_image, input_size=416, CLASSES=YOLO_COCO_CLASSES, score_threshold=0.2, iou_threshold=0.3, rectangle_colors=''):
     image_data = image_preprocess(original_image, [input_size, input_size])
     image_data = image_data[np.newaxis, ...].astype(np.float32)
 
@@ -128,6 +130,20 @@ def getwindowgeometry():
                 time.sleep(5)
                 continue
 
+def move_mouse(x1,y1,x2,y2,use_relate_xy):
+    
+    duration = 0# 0.05 + int(random.random()*100)/800
+    try:
+        if use_relate_xy:
+            pyautogui.move(x2,y2,duration,tween=pyautogui.easeOutQuad)
+        else:
+            pyautogui.moveTo(x1,y1,duration,tween=pyautogui.easeOutQuad)
+    except Exception as e:
+        if use_relate_xy:
+            pyautogui.move(x2,y2,duration)
+        else:
+            pyautogui.moveTo(x1,y1,duration)
+
 offset = 30
 times = []
 sct = mss.mss()
@@ -135,74 +151,99 @@ yolo = Load_Yolo_model()
 #x, y, w, h = getwindowgeometry()
 #monitor = {"top": 80, "left": 0, "width": consts.width, "height": consts.height}
 x=0
-y=0
-w=1920
-h=1080
+y=34
+w=int(1600/2)
+h=int(900/2)
 pyautogui.FAILSAFE=False
 mouseDown_time = 0
+show_debug_window = True
 while True:
     try:
         t1 = time.time()
 
-        img = np.array(sct.grab({"top": y, "left": x, "width": w, "height": h, "mon": -1}))
+        img = np.array(sct.grab({"top": y + int(h-h /2), "left": x + int(w -w/2), "width": w, "height": h, "mon": -1}))
         img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
         #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         image, detection_list, bboxes = detect_enemy(yolo, np.copy(img), input_size=YOLO_INPUT_SIZE, CLASSES=TRAIN_CLASSES, rectangle_colors=(255,0,0))
         cv2.circle(image,(int(w/2),int(h/2)), 3, (255,255,255), -1) # center of weapon sight
-
+        #print("detection_list:",len(detection_list))
         th_list, t_list = [], []
         for detection in detection_list:
             diff_x = (int(w/2) - int(detection[1]))*-1
             diff_y = (int(h/2) - int(detection[2]))*-1
             if detection[0] == "th":
                 th_list += [diff_x, diff_y]
-            elif detection[0] == "t":
+            else:
                 t_list += [diff_x, diff_y]
         move=()
         movehead =()
-        if mouseDown_time > 0 and time.time() - mouseDown_time >2:
-            pyautogui.mouseUp(button='left')
+        if mouseDown_time > 0 :
+            if time.time() - mouseDown_time >0.5:
+                pyautogui.mouseUp(button='left')
+                mouseDown_time = 0
+            else:
+                pyautogui.click()        
+
+        use_relate_xy = True
 
         if len(th_list)>0:
             new = min(th_list[::2], key=abs)
             index = th_list.index(new)
+
             x1 = w/2 + x + th_list[index]
             y1 = h/2 + y + th_list[index+1]
             
             movehead = (x1,y1)
-            pyautogui.moveTo(x1,y1,0.22 + random.random()/5,pyautogui.easeOutQuad)
-            if abs(th_list[index])<12:
-                pyautogui.mouseDown(button='left')
-                mouseDown_time = time.time()
+            movehead = (th_list[index],th_list[index+1])
+
+            move_mouse(x1,y1,th_list[index],th_list[index+1],use_relate_xy)
+            pyautogui.click()
+            if abs(th_list[index])<20:
+
+                if mouseDown_time == 0:
+                    pyautogui.mouseDown(button='left')
+                    print("head mouseDown")
+                    mouseDown_time = time.time()
+
         elif len(t_list)>0:
             new = min(t_list[::2], key=abs)
             index = t_list.index(new)
             x2 = w/2 + x + t_list[index]
             y2 = h/2 + y + t_list[index+1]
-            
+            #xx = t_list[index]
             move = (x2,y2)
-            pyautogui.moveTo(x2,y2,0.22 + random.random()/5,pyautogui.easeOutQuad)
-            if abs(t_list[index])<12:
-                pyautogui.mouseDown(button='left')
-                mouseDown_time = time.time()
+            movehead = (t_list[index],t_list[index+1])
+            move_mouse(x2,y2,t_list[index],t_list[index+1],use_relate_xy)
+            pyautogui.click()
+            if abs(t_list[index])<20:
+              
+                if mouseDown_time == 0:
+                    pyautogui.mouseDown(button='left')
+                    print("body mouseDown")
+                    mouseDown_time = time.time()
 
         t2 = time.time()
         times.append(t2-t1)
         times = times[-50:]
         ms = sum(times)/len(times)*1000
         fps = 1000 / ms
-        print("h",movehead,"b",move,"FPS %1.2f"% fps)
+        print("h",movehead,"b",move,"FPS %1.2f"% fps,"detect:",len(detection_list),"th",len(th_list),"t",len(t_list))
 
-        image = cv2.putText(image, "Time: {:.1f}FPS".format(fps), (0, 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 2)
-        img_test = cv2.resize(image, None, fx=0.25, fy=0.25, interpolation=cv2.INTER_NEAREST)
-        windowname= "OpenCV/Numpy normal"
+        if show_debug_window:
+            image = cv2.putText(image, "Time: {:.1f}FPS".format(fps), (0, 30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 2)
+            img_test = cv2.resize(image, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_NEAREST)
+            windowname= "OpenCV/Numpy normal"
 
-        #cv2.namedWindow(windowname, 0)
-        #cv2.resizeWindow(windowname, 480, 320)
-        cv2.imshow(windowname, img_test)
-        if cv2.waitKey(5) & 0xFF == ord("q"):
-            cv2.destroyAllWindows()
+            #cv2.namedWindow(windowname, 0)
+            #cv2.resizeWindow(windowname, 480, 320)
+            cv2.imshow(windowname, img_test)
+
+        if cv2.waitKey(5) & 0xFF == ord("/"):
+            #cv2.destroyAllWindows()
+            show_debug_window = not show_debug_window   
             #break
+
     except Exception as e:
         print("err",e)
-        pass
+        #raise e
+        #pass
