@@ -5,6 +5,9 @@ https://www.bilibili.com/video/BV1av411N7ix/
 
 install :
 
+net disk：https://pan.baidu.com/s/1lNx5HSUR5q1BKIFRxLmcbQ 
+code：5566
+
 install python 3.7
 
 run "install 安装.bat"
@@ -24,17 +27,17 @@ please edit  settings.ini for best experince：
 
 api_active_key: your activation code (contact hayoou_com@126.com)
 
-user_role: t is Terrorist, ct is a policeman, depending on your current role, avoid shooting friendly forces
+user_role: t is terror, ct is a police, depending on your current role, avoid shooting friendly forces
 
 shot_area_adj: The larger the size of the judgment frame, the larger the judgement is, the shot will be taken. The higher the chance of pulling the trigger
 
-shot_with_key: default 0, 17 means squat down while shooting
+shot_with_key: default 0, 17 means squat down while fire
 
 move_time: Simulate mouse movement time
 
 move_relat_x_adj: horizontal sensitivity
 
-score_threshold: the sensitivity of detecting the enemy
+score_threshold: the sensitivity of detecting the other team
 
 
 Please connect to the Internet and configure the correct activation code for better results. The inactive version will lose 40% accuracy
@@ -44,12 +47,15 @@ hayoou_com@126.com
 
 ---------------
 
-# CSGO-目标检测瞄准机器人-TensorFlow-YOLOv4
+# CSGO-目标检测——机器人-TensorFlow-YOLOv4
 
 测试视频：
 https://www.bilibili.com/video/BV1av411N7ix/
 
 安装 :
+
+链接：https://pan.baidu.com/s/1lNx5HSUR5q1BKIFRxLmcbQ 
+提取码：5566
 
 先安装 python 3.7
 
@@ -70,16 +76,17 @@ checkpoints\yolov4_custom.data-00000-of-00001
 
 api_active_key：你的的激活码（联系 hayoou_com@126.com)
 
-user_role:t 是匪，ct 是警察，取决于你当前角色，避免射击友军
+user_role:t 是T，ct 是 jingcha，取决于你当前角色，避免打到友军
 
-shot_area_adj:判断框的大小，越大，进入判断看，就射击，扣动扳机几率越高
+shot_area_adj:判断框的大小，越大，进入判断框，开火几率越高
 
-shot_with_key：默认 0 ，17 就是射击时蹲下
+shot_with_key：默认 0 ，17 就是开火时蹲下
+
 move_time:模拟鼠标移动时间
 
 move_relat_x_adj:水平灵敏度
 
-score_threshold:检出敌方的灵敏度
+score_threshold:检出对面队伍的灵敏度
 
 请连接网络，并且配置正确的 激活码，效果才能更好，未激活版本会丢失40%精准度
 
