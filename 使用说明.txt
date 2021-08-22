@@ -20,3 +20,22 @@ checkpoints\yolov4_custom.data-00000-of-00001
 请编辑 settings.ini 获得更好的体验。
 
 
+
+api_active_key：你的的激活码（联系 hayoou_com@126.com)
+
+user_role:t 是匪，ct 是警察，取决于你当前角色，避免射击友军
+
+shot_area_adj:判断框的大小，越大，进入判断看，就射击，扣动扳机几率越高
+
+shot_with_key：默认 0 ，17 就是射击时蹲下
+move_time:模拟鼠标移动时间
+
+move_relat_x_adj:水平灵敏度
+
+score_threshold:检出敌方的灵敏度
+
+请连接网络，并且配置正确的 激活码，效果才能更好，未激活版本会丢失40%精准度
+
+激活请联系： hayoou_com@126.com
+
+
