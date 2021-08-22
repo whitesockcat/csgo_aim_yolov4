@@ -30,4 +30,4 @@ def send_damo(HWND , key_action , keycode ,mouse_action ,mouse_button,move_time,
     #print(data1.decode('utf-8'))
     #tcpCliSock.close()
 
-send_damo("0","down",0,"down","right",0.2,200,210,-1,-1,0,"8881714191894060058")
+#send_damo("0","down",0,"down","right",0.2,200,210,-1,-1,"8881714191894060058")
