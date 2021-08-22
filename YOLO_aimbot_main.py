@@ -143,7 +143,7 @@ def getwindowgeometry():
 
 mouse = PyMouse()
 keyboard = PyKeyboard()   # 键盘的实例k
-damo_socket_api_key = "testtest"
+damo_socket_api_key = ""
 def move_mouse(x1,y1,x2,y2,use_relate_xy,cf):
     x2 = x2 * cf["move_relat_x_adj"]
     y2 = y2 * cf["move_relat_y_adj"]
@@ -175,6 +175,7 @@ def key_action(hwnd,action,key_code):
     dm_socket.send_damo(hwnd,action,key_code,"","",0,0,0,-1,-1,damo_socket_api_key)
 
 def get_config():
+    global damo_socket_api_key
     path = "settings.ini"
 
     config = configparser.ConfigParser()
@@ -192,7 +193,10 @@ def get_config():
     cf["shot_with_key"] = config.getint("Settings", "shot_with_key")
     cf["shot_hold_time"] = config.getfloat("Settings", "shot_hold_time")
     cf["shot_vertical_fix"] = config.getint("Settings", "shot_vertical_fix")
-    return cf
+    cf['score_threshold'] = config.getfloat("Settings", "score_threshold")
+    cf['iou_threshold'] = config.getfloat("Settings", "iou_threshold")
+    damo_socket_api_key = config.get("Settings", "api_active_key")
+    return cf   
 
 def take_action(shot_type,detect_list,cf):
     global mouseDown_time
@@ -268,7 +272,8 @@ while True:
         img = np.array(sct.grab({"top": y + int(h-h /2), "left": x + int(w -w/2), "width": w, "height": h, "mon": -1}))
         img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
         #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image, detection_list, bboxes = detect_enemy(yolo, np.copy(img), input_size=YOLO_INPUT_SIZE, CLASSES=TRAIN_CLASSES, rectangle_colors=(255,0,0))
+        image, detection_list, bboxes = detect_enemy(yolo, np.copy(img), input_size=YOLO_INPUT_SIZE, CLASSES=TRAIN_CLASSES, 
+        score_threshold=cf['score_threshold'], iou_threshold=cf['iou_threshold'], rectangle_colors=(255,0,0))
         cv2.circle(image,(int(w/2),int(h/2)), 3, (255,255,255), -1) # center of weapon sight
         #print("detection_list:",len(detection_list))
         th_list, t_list = [], []
